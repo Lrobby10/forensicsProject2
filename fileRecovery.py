@@ -33,7 +33,6 @@ def recoverGIF():
 
 #variables
 fileName = sys.argv[1]
-imageSize = os.path.getsize(fileName)
 
 #recovers files with JPG extension
 def JPGrecover():
@@ -119,3 +118,105 @@ def DOCXrecover():
             print("End of file")
         print(str(count) + ' DOCX files found')
     return count
+
+#recover files with AVI extension
+def AVIrecover():
+    print('\nAVI Files:\n')
+    with open(fileName, 'rb') as f:
+        s = f.read()
+        index = 0
+        count = 0
+
+        try:
+            while True:
+                #for AVI files the RIFF header is 0x52 49 46 46
+                #then the actual AVI header is 0x41 56 49 20 4C 49 53 54
+                index = s.index(b'\x52\x49\x46\x46', index)
+
+                if(index + 8 != s.index(b'\x41\x56\x49\x20\x4C\x49\x53\x54', index)):
+                    index += 4
+                    continue
+
+                if(index % 0x1000 != 0):
+                    index += 4
+                    continue
+
+
+                #find the file size
+                sizeAVI = int.from_bytes(s[index + 4:index + 8], 'little')
+
+                writtenFile = open(str(count) + ".avi", "wb")
+                writtenFile.write(s[index:index + sizeAVI + 1])
+                writtenFile.close()
+                print('File contents written to ' + str(count) + '.avi')
+
+                #print offset info
+                print('Start Offset: ' + hex(index))
+                print('End Offset: ' + hex(index + sizeAVI))
+
+                #get hash info
+                hash = hashlib.sha256(s[index:index + sizeAVI + 1]).hexdigest()
+                print('SHA-256: ' + hash)
+
+                #increment to keep checking for other AVI files
+                index = index + sizeAVI
+                count += 1
+                print()
+        except ValueError:
+            print("End of file")
+        print(str(count) + ' AVI files found')
+    return count
+
+#recover files with PNG extension
+def PNGrecover():
+    print('\nPNG Files:\n')
+    with open(fileName, 'rb') as f:
+        s = f.read()
+        index = 0
+        count = 0
+
+        try:
+            while True:
+                #for PNG files the header is 0x89 50 4E 47 0D 0A 1A 0A
+                index = s.index(b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A', index)
+                if(index % 0x1000 != 0):
+                    index += 8
+                    continue
+
+                #DOCX has footer of 0x49 45 4E 44 AE 42 60 82
+                endIndex = s.index(b'\x49\x45\x4E\x44\xAE\x42\x60\x82', index) + 7
+
+                writtenFile = open(str(count) + ".png", "wb")
+                writtenFile.write(s[index:endIndex + 1])
+                writtenFile.close()
+                print('File contents written to ' + str(count) + '.png')
+
+                #print offset info
+                print('Start Offset: ' + hex(index))
+                print('End Offset: ' + hex(endIndex))
+
+                #get hash info
+                hash = hashlib.sha256(s[index:endIndex + 1]).hexdigest()
+                print('SHA-256: ' + hash)
+
+                #increment to keep checking for other DOCX files
+                index = endIndex
+                count += 1
+                print()
+        except ValueError:
+            print("End of file")
+        print(str(count) + ' PNG files found')
+    return count
+
+#to find total number of recovered files:
+
+numRecovered = 0
+numRecovered += recoverMPG()
+numRecovered += recoverPDF()
+numRecovered += recoverBMP()
+numRecovered += recoverGIF()
+numRecovered += JPGrecover()
+numRecovered += DOCXrecover()
+numRecovered += AVIrecover()
+numRecovered += PNGrecover()
+print('\nNumber of recovered files: ' + str(numRecovered))
