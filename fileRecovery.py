@@ -89,7 +89,7 @@ def DOCXrecover():
         try:
             while True:
                 #for DOCX files the header is 0x50 4B 03 04 14 00 06 00
-                index = s.index(b'\x50\x4B\x03\x04\x14\x14\x00\x06\x00', index)
+                index = s.index(b'\x50\x4B\x03\x04\x14\x00\x06\x00', index)
                 if(index % 0x1000 != 0):
                     index += 8
                     continue
