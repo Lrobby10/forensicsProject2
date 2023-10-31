@@ -50,17 +50,17 @@ def recoverMPG():
                 end_offset = int(((trailerIndex + 7)/ 2))
                 hex_start = hex(start_offset)
                 hex_end = hex(end_offset)
-                print("mpg file found:" + "\n" + f"start offset: {hex_start}" + "\t" + f"end offset: {hex_end}")
-
                 fileName = 'MPGfile' + str(mpgCount) + '.mpg'
+                print("mpg file found: " + fileName + "\n" + f"start offset: {hex_start}" + "\t" + f"end offset: {hex_end}")
                 
-                fileRecovery = 'dd if=' + str(sys.argv[1]) + ' of=' + fileName + ' bs=1 skip=' + str(start_offset) + ' count=' + str(end_offset-start_offset)
-                print(fileRecovery)
+                fileRecovery = 'dd if=' + str(sys.argv[1]) + ' of=' + fileName + ' bs=512 skip=' + str(int(start_offset / 512)) + ' count=' + str(math.ceil((end_offset-start_offset) / 512)) + ' 2>error_log.txt &'
+                # print(fileRecovery)
                 os.system(fileRecovery)
 
                 hashCmd = "sha256sum " + fileName
                 print("sha256 hash: ")
                 os.system(hashCmd)
+                print('\n')
                 signatureIndex = end_offset * 2
             else: signatureIndex = signatureIndex + 8
         else: break
@@ -80,33 +80,92 @@ def recoverBMP():
                 # start_offset = int(signatureIndex / 2)
                 # leFileSize = diskHex[signatureIndex + 4: signatureIndex + 12]
                 beFileSize = getBEfromString(diskHex[signatureIndex:])
-                print('beFileSize: ' + beFileSize)
-                print(type(beFileSize))
+                # print('beFileSize: ' + beFileSize)
+                # print(type(beFileSize))
                 fileSize = int(beFileSize, 16)
-                print('fileSize: ' + f'{fileSize}')
+                # print('fileSize: ' + f'{fileSize}')
 
-                print (fileSize)
+                # print (fileSize)
                 start_offset = int(signatureIndex / 2)
                 end_offset = int(start_offset + fileSize)
                 hex_start = hex(start_offset)
                 hex_end = hex(end_offset)
-                print("mpg file found:" + "\n" + f"start offset: {hex_start}" + "\t" + f"end offset: {hex_end}")
-
                 fileName = 'BMPfile' + str(bmpCount) + '.bmp'
+                print("bmp file found: " + fileName + "\n" + f"start offset: {hex_start}" + "\t" + f"end offset: {hex_end}")
                 
-                fileRecovery = 'dd if=' + str(sys.argv[1]) + ' of=' + fileName + ' bs=1 skip=' + str(start_offset) + ' count=' + str(fileSize)
-                print(fileRecovery)
+                fileRecovery = 'dd if=' + str(sys.argv[1]) + ' of=' + fileName + ' bs=512 skip=' + str(int(start_offset / 512)) + ' count=' + str(math.ceil(fileSize / 512)) + ' 2>error_log.txt &'
+                # print(fileRecovery)
                 os.system(fileRecovery)
 
                 hashCmd = "sha256sum " + fileName
                 print("sha256 hash: ")
                 os.system(hashCmd)
+                print('\n')
                 signatureIndex = end_offset * 2
                 # print("end sig index: " + str(signatureIndex))
             else: signatureIndex = signatureIndex + 8
         else: break
     return 0
 def recoverGIF():
+    gifCount = 0
+    signatureIndex = 0
+    gifSig = "474946383961", "474946383961" 
+    gifTrail = "003b0000"
+    while True:
+        signatureIndex = diskHex.find(gifSig[0], signatureIndex)
+        # print(signatureIndex)
+        # print("start sig index: " + str(signatureIndex))
+        if signatureIndex != -1:
+            if signatureIndex % 512 == 0:
+
+                gifCount += 1
+
+                start_offset = int(signatureIndex / 2)
+                trailerIndex = diskHex.find(gifTrail, signatureIndex)
+                end_offset = int(((trailerIndex + 7)/ 2))
+                hex_start = hex(start_offset)
+                hex_end = hex(end_offset)
+                fileName = 'GIFfile' + str(gifCount) + '.gif'
+                print("gif file found: " + fileName + "\n" + f"start offset: {hex_start}" + "\t" + f"end offset: {hex_end}")
+                
+                fileRecovery = 'dd if=' + str(sys.argv[1]) + ' of=' + fileName + ' bs=512 skip=' + str(int(start_offset / 512)) + ' count=' + str(math.ceil((end_offset-start_offset) / 512)) + ' 2>error_log.txt &'
+                # print(fileRecovery)
+                os.system(fileRecovery)
+
+                hashCmd = "sha256sum " + fileName
+                print("sha256 hash: ")
+                os.system(hashCmd)
+                print('\n')
+                signatureIndex = end_offset * 2
+            else: signatureIndex = signatureIndex + 8
+        else: break
+    while True:
+        signatureIndex = diskHex.find(gifSig[1], signatureIndex)
+        # print("start sig index: " + str(signatureIndex))
+        if signatureIndex != -1:
+            if signatureIndex % 512 == 0:
+
+                gifCount += 1
+
+                start_offset = int(signatureIndex / 2)
+                trailerIndex = diskHex.find(gifTrail, signatureIndex)
+                end_offset = int(((trailerIndex + 7)/ 2))
+                hex_start = hex(start_offset)
+                hex_end = hex(end_offset)
+                fileName = 'GIFfile' + str(gifCount) + '.gif'
+                print("gif file found: " + fileName + "\n" + f"start offset: {hex_start}" + "\t" + f"end offset: {hex_end}")
+                
+                fileRecovery = 'dd if=' + str(sys.argv[1]) + ' of=' + fileName + ' bs=512 skip=' + str(int(start_offset / 512)) + ' count=' + str(math.ceil((end_offset-start_offset) / 512)) + ' 2>error_log.txt &'
+                # print(fileRecovery)
+                os.system(fileRecovery)
+
+                hashCmd = "sha256sum " + fileName
+                print("sha256 hash: ")
+                os.system(hashCmd)
+                print('\n')
+                signatureIndex = end_offset * 2
+            else: signatureIndex = signatureIndex + 8
+        else: break
     return 0
 
 def getBEfromString(input_string):
@@ -114,5 +173,6 @@ def getBEfromString(input_string):
     return beString
 
 if __name__ == "__main__":
-    # recoverMPG()
+    recoverMPG()
     recoverBMP()
+    recoverGIF()
