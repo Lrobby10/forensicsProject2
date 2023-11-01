@@ -48,7 +48,7 @@ def JPGrecover():
 
                 #check if we're at the start of a sector 
                 #if we aren't increment, if we are continue
-                if (index % 0x100 != 0):
+                if (index % 0x1000 != 0):
                     index += 2
                     continue
 
@@ -143,23 +143,25 @@ def AVIrecover():
 
 
                 #find the file size
-                sizeAVI = int.from_bytes(s[index + 4:index + 16], 'little')
+                #which is in spot 4-8 (in little endian)
+                sizeAVI = int.from_bytes(s[index + 4:index + 8], 'little')
+                endIndex = index + sizeAVI
 
                 writtenFile = open(str(count) + ".avi", "wb")
-                writtenFile.write(s[index:index + sizeAVI + 1])
+                writtenFile.write(s[index:endIndex + 1])
                 writtenFile.close()
                 print('File contents written to ' + str(count) + '.avi')
 
                 #print offset info
                 print('Start Offset: ' + hex(index))
-                print('End Offset: ' + hex(index + sizeAVI))
+                print('End Offset: ' + hex(endIndex))
 
                 #get hash info
-                hash = hashlib.sha256(s[index:index + sizeAVI + 1]).hexdigest()
+                hash = hashlib.sha256(s[index:endIndex + 1]).hexdigest()
                 print('SHA-256: ' + hash)
 
                 #increment to keep checking for other AVI files
-                index = index + sizeAVI
+                index = endIndex
                 count += 1
                 print()
         except ValueError:
