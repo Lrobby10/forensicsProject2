@@ -116,7 +116,7 @@ def DOCXrecover():
                 print()
         except ValueError:
             print("End of file")
-        print(str(count) + ' DOCX files found')
+        print(str(count) + ' DOCX file found')
     return count
 
 #recover files with AVI extension
@@ -143,7 +143,7 @@ def AVIrecover():
 
 
                 #find the file size
-                sizeAVI = int.from_bytes(s[index + 4:index + 8], 'little')
+                sizeAVI = int.from_bytes(s[index + 4:index + 16], 'little')
 
                 writtenFile = open(str(count) + ".avi", "wb")
                 writtenFile.write(s[index:index + sizeAVI + 1])
@@ -183,7 +183,7 @@ def PNGrecover():
                     index += 8
                     continue
 
-                #DOCX has footer of 0x49 45 4E 44 AE 42 60 82
+                #PNG has footer of 0x49 45 4E 44 AE 42 60 82
                 endIndex = s.index(b'\x49\x45\x4E\x44\xAE\x42\x60\x82', index) + 7
 
                 writtenFile = open(str(count) + ".png", "wb")
@@ -199,13 +199,13 @@ def PNGrecover():
                 hash = hashlib.sha256(s[index:endIndex + 1]).hexdigest()
                 print('SHA-256: ' + hash)
 
-                #increment to keep checking for other DOCX files
+                #increment to keep checking for other PNG files
                 index = endIndex
                 count += 1
                 print()
         except ValueError:
             print("End of file")
-        print(str(count) + ' PNG files found')
+        print(str(count) + ' PNG file found')
     return count
 
 #to find total number of recovered files:
