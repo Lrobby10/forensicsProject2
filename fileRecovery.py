@@ -145,10 +145,16 @@ def AVIrecover():
                 #find the file size
                 #which is in spot 4-8 (in little endian)
                 sizeAVI = int.from_bytes(s[index + 4:index + 8], 'little')
+
+                #the size from offset 4-8 is the remaining size (file size - 8 bytes)
+                #in little endian, so should endIndex be index + sizeAVI + 8?
                 endIndex = index + sizeAVI
 
                 writtenFile = open(str(count) + ".avi", "wb")
+
+                #I think it's the writing to the file that's the problem
                 writtenFile.write(s[index:endIndex + 1])
+
                 writtenFile.close()
                 print('File contents written to ' + str(count) + '.avi')
 
