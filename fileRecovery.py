@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
 
+# Luke Robinson and Courtney Stewart
+# COMP 5350 Project 2
+
 #sources:
-#https://stackoverflow.com/questions/2269827/how-to-convert-an-int-to-a-hex-string
-#https://stackoverflow.com/questions/48613002/sha-256-hashing-in-python
-#https://stackoverflow.com/questions/24953303/how-to-reverse-an-int-in-python
-#https://stackoverflow.com/questions/931092/how-do-i-reverse-a-string-in-python
+# https://stackoverflow.com/questions/2269827/how-to-convert-an-int-to-a-hex-string
+# https://stackoverflow.com/questions/48613002/sha-256-hashing-in-python
+# https://stackoverflow.com/questions/24953303/how-to-reverse-an-int-in-python
+# https://stackoverflow.com/questions/931092/how-do-i-reverse-a-string-in-python
+# https://www.garykessler.net/library/file_sigs.html
+# https://stackoverflow.com/questions/2269827/how-to-convert-an-int-to-a-hex-string
+# https://stackoverflow.com/questions/22901285/taking-a-hex-file-and-extracting-data
+# https://stackoverflow.com/questions/931092/how-do-i-reverse-a-string-in-python
+# https://stackoverflow.com/questions/3398410/python-get-number-without-decimal-places
 
 
 import sys
@@ -372,16 +380,16 @@ def PNGrecover():
 
 #to find total number of recovered files:
 
-numRecovered = 0
-numRecovered += recoverMPG()
-numRecovered += recoverPDF()
-numRecovered += recoverBMP()
-numRecovered += recoverGIF()
-numRecovered += JPGrecover()
-numRecovered += DOCXrecover()
-numRecovered += AVIrecover()
-numRecovered += PNGrecover()
-print('\nNumber of recovered files: ' + str(numRecovered))
+# numRecovered = 0
+# numRecovered += recoverMPG()
+# numRecovered += recoverPDF()
+# numRecovered += recoverBMP()
+# numRecovered += recoverGIF()
+# numRecovered += JPGrecover()
+# numRecovered += DOCXrecover()
+# numRecovered += AVIrecover()
+# numRecovered += PNGrecover()
+# print('\nNumber of recovered files: ' + str(numRecovered))
 
 def getBEfromString(input_string):
     beString = input_string[10:12] + input_string[8:10] + input_string[6:8]+ input_string[4:6]
@@ -399,3 +407,11 @@ if __name__ == "__main__":
     recoverBMP()
     recoverGIF()
     recoverPDF()
+
+    JPGrecover()
+    DOCXrecover()
+    AVIrecover()
+    PNGrecover()
+
+    print("Recovered files can be found in: ")
+    os.system('pwd')
