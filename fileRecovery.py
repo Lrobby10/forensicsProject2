@@ -21,15 +21,78 @@ except FileNotFoundError:
     sys.exit("File Not Found")
 
 def recoverPDF():
-    # offset = 0
-    # pdfSig = "25504446"
-    # pdfEOF = {'eof1' : ""}
-    # while offset != -1:
-    #     start_offset = diskHex.find(pdfSig, offset) / 2 #one byte is 2 hex characters
-    #     end_offset = diskHex.find()
+    pdfCount = 0
+    signatureIndex = 0
+    pdfSig = "25504446"
+    pdfTrail = "0a2525454f460a", "0a2525454f46", "0d0a2525454f460d0a", "0d25254f4f460d"
 
+    location = 0
+    indexList = []
+    while location < len(diskHex):
+        pdfLocation = diskHex.find(pdfSig, location)
+        if pdfLocation % 512 == 0:
+            indexList.append(pdfLocation)
+        location = pdfLocation + 7
+        if location == 6: break
+        # print(indexList)
 
+    for i in range (len(indexList)):
+        startIndex = indexList[i]
+        if indexList[i] == indexList[-1]:
+            searchLocation = diskHex[indexList[-1]:]
+            print(indexList[-1])
+        else: 
+            searchLocation = diskHex[indexList[i]:indexList[i+1]]
+            print(indexList[i], indexList[i + 1])
 
+        start_offset = int(startIndex / 2)
+        # print(searchLocation)
+        # lasEof = findLastEof(searchLocation, pdfTrail)
+        # print(lasEof)
+        end_offset = int(findLastEof(searchLocation, pdfTrail) / 2) + start_offset
+
+        hex_start = hex(start_offset)
+        hex_end = hex(end_offset)
+        pdfCount += 1
+        fileName = fileName = 'PDFfile' + str(pdfCount) + '.pdf'
+        print("pdf file found: " + fileName + "\n" + f"start offset: {hex_start}" + "\t" + f"end offset: {hex_end}")
+                
+        fileRecovery = 'dd if=' + str(sys.argv[1]) + ' of=' + fileName + ' bs=512 skip=' + str(int(start_offset / 512)) + ' count=' + str(math.ceil((end_offset-start_offset) / 512)) + ' 2>error_log.txt &'
+        print(fileRecovery)
+        os.system(fileRecovery)
+
+        hashCmd = "sha256sum " + fileName
+        print("sha256 hash: ")
+        # os.system(hashCmd)
+        print('\n')
+
+    # while True:
+    #     # print("start sig index: " + str(signatureIndex))
+    #             pdfCount += 1
+
+    #             start_offset = int(signatureIndex / 2)
+    #             end_offset = 0
+    #             for trailer in pdfTrail:
+    #                 trailerIndex = diskHex.find(trailer, signatureIndex)
+    #                 if trailerIndex != -1: 
+    #                     end_offset = int((trailerIndex + len(trailer) - 1) / 2)
+    #                     break
+
+    #             hex_start = hex(start_offset)
+    #             hex_end = hex(end_offset)
+    #             fileName = 'PDFfile' + str(pdfCount) + '.pdf'
+    #             print("pdf file found: " + fileName + "\n" + f"start offset: {hex_start}" + "\t" + f"end offset: {hex_end}")
+                
+    #             fileRecovery = 'dd if=' + str(sys.argv[1]) + ' of=' + fileName + ' bs=512 skip=' + str(int(start_offset / 512)) + ' count=' + str(math.ceil((end_offset-start_offset) / 512)) + ' 2>error_log.txt &'
+    #             print(fileRecovery)
+    #             # os.system(fileRecovery)
+
+    #             hashCmd = "sha256sum " + fileName
+    #             print("sha256 hash: ")
+    #             # os.system(hashCmd)
+    #             print('\n')
+    #             signatureIndex = end_offset * 2
+    # return 0
     return 0
 def recoverMPG():
     mpgCount = 0
@@ -172,7 +235,18 @@ def getBEfromString(input_string):
     beString = input_string[10:12] + input_string[8:10] + input_string[6:8]+ input_string[4:6]
     return beString
 
+def findLastEof(input_string: str, eofList: list) -> int:
+    currentLast = 0
+    print('length of string: ' + str(len(input_string)))
+    for x in eofList:
+        # print(x)
+        eofLoc = input_string.find(x)
+        print('last eof locatioin: ' + str(eofLoc))
+        if eofLoc + len(x) > currentLast: currentLast = eofLoc
+    return currentLast + len(x) - 1
+
 if __name__ == "__main__":
-    recoverMPG()
-    recoverBMP()
-    recoverGIF()
+    # recoverMPG()
+    # recoverBMP()
+    # recoverGIF()
+    recoverPDF()
