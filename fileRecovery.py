@@ -3,8 +3,8 @@
 #sources:
 #https://stackoverflow.com/questions/2269827/how-to-convert-an-int-to-a-hex-string
 #https://stackoverflow.com/questions/48613002/sha-256-hashing-in-python
-# https://stackoverflow.com/questions/24953303/how-to-reverse-an-int-in-python
-# https://stackoverflow.com/questions/931092/how-do-i-reverse-a-string-in-python
+#https://stackoverflow.com/questions/24953303/how-to-reverse-an-int-in-python
+#https://stackoverflow.com/questions/931092/how-do-i-reverse-a-string-in-python
 
 
 import sys
@@ -34,21 +34,15 @@ def recoverPDF():
             indexList.append(pdfLocation)
         location = pdfLocation + 7
         if location == 6: break
-        # print(indexList)
 
     for i in range (len(indexList)):
         startIndex = indexList[i]
         if indexList[i] == indexList[-1]:
             searchLocation = diskHex[indexList[-1]:]
-            print(indexList[-1])
         else: 
             searchLocation = diskHex[indexList[i]:indexList[i+1]]
-            print(indexList[i], indexList[i + 1])
 
         start_offset = int(startIndex / 2)
-        # print(searchLocation)
-        # lasEof = findLastEof(searchLocation, pdfTrail)
-        # print(lasEof)
         end_offset = int(findLastEof(searchLocation, pdfTrail) / 2) + start_offset
 
         hex_start = hex(start_offset)
@@ -58,41 +52,12 @@ def recoverPDF():
         print("pdf file found: " + fileName + "\n" + f"start offset: {hex_start}" + "\t" + f"end offset: {hex_end}")
                 
         fileRecovery = 'dd if=' + str(sys.argv[1]) + ' of=' + fileName + ' bs=512 skip=' + str(int(start_offset / 512)) + ' count=' + str(math.ceil((end_offset-start_offset) / 512)) + ' 2>error_log.txt &'
-        print(fileRecovery)
         os.system(fileRecovery)
 
         hashCmd = "sha256sum " + fileName
         print("sha256 hash: ")
-        # os.system(hashCmd)
+        os.system(hashCmd)
         print('\n')
-
-    # while True:
-    #     # print("start sig index: " + str(signatureIndex))
-    #             pdfCount += 1
-
-    #             start_offset = int(signatureIndex / 2)
-    #             end_offset = 0
-    #             for trailer in pdfTrail:
-    #                 trailerIndex = diskHex.find(trailer, signatureIndex)
-    #                 if trailerIndex != -1: 
-    #                     end_offset = int((trailerIndex + len(trailer) - 1) / 2)
-    #                     break
-
-    #             hex_start = hex(start_offset)
-    #             hex_end = hex(end_offset)
-    #             fileName = 'PDFfile' + str(pdfCount) + '.pdf'
-    #             print("pdf file found: " + fileName + "\n" + f"start offset: {hex_start}" + "\t" + f"end offset: {hex_end}")
-                
-    #             fileRecovery = 'dd if=' + str(sys.argv[1]) + ' of=' + fileName + ' bs=512 skip=' + str(int(start_offset / 512)) + ' count=' + str(math.ceil((end_offset-start_offset) / 512)) + ' 2>error_log.txt &'
-    #             print(fileRecovery)
-    #             # os.system(fileRecovery)
-
-    #             hashCmd = "sha256sum " + fileName
-    #             print("sha256 hash: ")
-    #             # os.system(hashCmd)
-    #             print('\n')
-    #             signatureIndex = end_offset * 2
-    # return 0
     return 0
 def recoverMPG():
     mpgCount = 0
@@ -101,7 +66,6 @@ def recoverMPG():
     mpgTrail = "000001b7", "000001b9"
     while True:
         signatureIndex = diskHex.find(mpgSig, signatureIndex)
-        # print("start sig index: " + str(signatureIndex))
         if signatureIndex != -1:
             if signatureIndex % 512 == 0:
 
@@ -117,7 +81,6 @@ def recoverMPG():
                 print("mpg file found: " + fileName + "\n" + f"start offset: {hex_start}" + "\t" + f"end offset: {hex_end}")
                 
                 fileRecovery = 'dd if=' + str(sys.argv[1]) + ' of=' + fileName + ' bs=512 skip=' + str(int(start_offset / 512)) + ' count=' + str(math.ceil((end_offset-start_offset) / 512)) + ' 2>error_log.txt &'
-                # print(fileRecovery)
                 os.system(fileRecovery)
 
                 hashCmd = "sha256sum " + fileName
@@ -140,15 +103,9 @@ def recoverBMP():
 
                 bmpCount += 1
 
-                # start_offset = int(signatureIndex / 2)
-                # leFileSize = diskHex[signatureIndex + 4: signatureIndex + 12]
                 beFileSize = getBEfromString(diskHex[signatureIndex:])
-                # print('beFileSize: ' + beFileSize)
-                # print(type(beFileSize))
                 fileSize = int(beFileSize, 16)
-                # print('fileSize: ' + f'{fileSize}')
 
-                # print (fileSize)
                 start_offset = int(signatureIndex / 2)
                 end_offset = int(start_offset + fileSize)
                 hex_start = hex(start_offset)
@@ -157,7 +114,6 @@ def recoverBMP():
                 print("bmp file found: " + fileName + "\n" + f"start offset: {hex_start}" + "\t" + f"end offset: {hex_end}")
                 
                 fileRecovery = 'dd if=' + str(sys.argv[1]) + ' of=' + fileName + ' bs=512 skip=' + str(int(start_offset / 512)) + ' count=' + str(math.ceil(fileSize / 512)) + ' 2>error_log.txt &'
-                # print(fileRecovery)
                 os.system(fileRecovery)
 
                 hashCmd = "sha256sum " + fileName
@@ -165,7 +121,6 @@ def recoverBMP():
                 os.system(hashCmd)
                 print('\n')
                 signatureIndex = end_offset * 2
-                # print("end sig index: " + str(signatureIndex))
             else: signatureIndex = signatureIndex + 8
         else: break
     return 0
@@ -176,8 +131,6 @@ def recoverGIF():
     gifTrail = "003b0000"
     while True:
         signatureIndex = diskHex.find(gifSig[0], signatureIndex)
-        # print(signatureIndex)
-        # print("start sig index: " + str(signatureIndex))
         if signatureIndex != -1:
             if signatureIndex % 512 == 0:
 
@@ -192,7 +145,6 @@ def recoverGIF():
                 print("gif file found: " + fileName + "\n" + f"start offset: {hex_start}" + "\t" + f"end offset: {hex_end}")
                 
                 fileRecovery = 'dd if=' + str(sys.argv[1]) + ' of=' + fileName + ' bs=512 skip=' + str(int(start_offset / 512)) + ' count=' + str(math.ceil((end_offset-start_offset) / 512)) + ' 2>error_log.txt &'
-                # print(fileRecovery)
                 os.system(fileRecovery)
 
                 hashCmd = "sha256sum " + fileName
@@ -204,7 +156,6 @@ def recoverGIF():
         else: break
     while True:
         signatureIndex = diskHex.find(gifSig[1], signatureIndex)
-        # print("start sig index: " + str(signatureIndex))
         if signatureIndex != -1:
             if signatureIndex % 512 == 0:
 
@@ -219,7 +170,6 @@ def recoverGIF():
                 print("gif file found: " + fileName + "\n" + f"start offset: {hex_start}" + "\t" + f"end offset: {hex_end}")
                 
                 fileRecovery = 'dd if=' + str(sys.argv[1]) + ' of=' + fileName + ' bs=512 skip=' + str(int(start_offset / 512)) + ' count=' + str(math.ceil((end_offset-start_offset) / 512)) + ' 2>error_log.txt &'
-                # print(fileRecovery)
                 os.system(fileRecovery)
 
                 hashCmd = "sha256sum " + fileName
@@ -237,16 +187,13 @@ def getBEfromString(input_string):
 
 def findLastEof(input_string: str, eofList: list) -> int:
     currentLast = 0
-    print('length of string: ' + str(len(input_string)))
     for x in eofList:
-        # print(x)
-        eofLoc = input_string.find(x)
-        print('last eof locatioin: ' + str(eofLoc))
-        if eofLoc + len(x) > currentLast: currentLast = eofLoc
+        eofLoc = input_string.find(x, currentLast)
+        if eofLoc > currentLast: currentLast = eofLoc
     return currentLast + len(x) - 1
 
 if __name__ == "__main__":
-    # recoverMPG()
-    # recoverBMP()
-    # recoverGIF()
+    recoverMPG()
+    recoverBMP()
+    recoverGIF()
     recoverPDF()
